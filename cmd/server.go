@@ -44,7 +44,12 @@ func (s server) metrics(w http.ResponseWriter, r *http.Request) {
 	flame := int(elapsedSeconds / s.interval.Seconds())
 
 	lines := lineBreak.Split(string(content), -1)
+	var commentLines []string
 	for _, line := range lines {
+		if strings.HasPrefix(line, "#") {
+			commentLines = append(commentLines, line)
+			continue
+		}
 		labels, values, err := parser.ParseSeriesDesc(line)
 		if err != nil {
 			http.Error(w, "failed to parse line", http.StatusInternalServerError)
@@ -65,12 +70,17 @@ func (s server) metrics(w http.ResponseWriter, r *http.Request) {
 		}
 		index := flame % len(values)
 		if !values[index].Omitted {
-			_, err = io.WriteString(w, fmt.Sprintf("%s{%s} %f\n", name, strings.Join(ls, ","), values[index].Value))
+			comment := strings.Join(commentLines, "\n")
+			if len(comment) != 0 {
+				comment += "\n"
+			}
+			_, err = io.WriteString(w, fmt.Sprintf("%s%s{%s} %f\n", comment, name, strings.Join(ls, ","), values[index].Value))
 			if err != nil {
 				http.Error(w, "failed to write response", http.StatusInternalServerError)
 				s.logger.Error("failed to write response", zap.Error(err))
 				return
 			}
 		}
+		commentLines = []string{}
 	}
 }

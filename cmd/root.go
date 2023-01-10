@@ -6,9 +6,8 @@ import (
 	"os"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var options struct {
