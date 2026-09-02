@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/prometheus/prometheus v0.42.0
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.24.0
 )
 
